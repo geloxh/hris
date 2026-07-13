@@ -1,0 +1,27 @@
+Goal:
+Create initial setup of the project
+Run:
+- Project Skeleton (DI Container, Routing, Console)
+composer create-project symfony/skeleton hris
+cd hris
+composer require webapp   # only if you need Twig/forms for admin UI later
+- Add
+composer require symfony/orm-pack          # Doctrine ORM + migrations
+composer require symfony/security-bundle   # auth (for HRIS user login, not ARS-to-HRIS)
+composer require symfony/messenger         # for async payslip generation via queue
+composer require symfony/http-client       # for calling ARS
+composer require symfony/serializer        # API request/response (de)serialization
+composer require api-platform/core         # optional: instant REST/JSON:API from Doctrine entities
+
+api-platform/core is worth seriously considering for HRIS's own API surface 
+(for a future frontend/mobile app) will be sizable — it auto-generates CRUD endpoints, 
+OpenAPI docs, and validation from the Doctrine entities, which saves a lot of controller boilerplate.
+
+- Create initial project structure
+- Create shared temporary HMAC lib: register as local path repository in both `composer.json` files (ARS and HRIS) using same signing implementation:
+"repositories": [
+    { "type": "path", "url": "../shared/hmac-lib" }
+],
+"require": {
+    "yourorg/hmac-lib": "*"
+}
