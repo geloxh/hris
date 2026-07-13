@@ -25,3 +25,16 @@ OpenAPI docs, and validation from the Doctrine entities, which saves a lot of co
 "require": {
     "yourorg/hmac-lib": "*"
 }
+
+
+Checklist:
+security.yaml
+services.yaml
+Version20260713000001.php
+ArsCallbackController.php
+GeneratePayslipMessage.php
+GeneratePayslipHandler.php
+HmacAuthenticator.php
+ApiNonceStore.php
+ArsClient.php
+.env
