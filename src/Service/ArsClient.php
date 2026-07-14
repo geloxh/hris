@@ -60,23 +60,79 @@
             
             return ['ok' => true, 'requests' => $result['data']['payslip_requests'] ?? [], 'error' => null];
         }
-  
+
+        /**
+         * @return array{ok: bool, requests: array, error: ?string}
+         */
+        public function getPayslipRequestsForEmployee(int $employeeId): array
+    {
+        $result = $this->request('GET', "/api/v1/employees/{$employeeId}/payslip-requests");
+
+        if (!$result['ok']) {
+            return ['ok' => false, 'requests' => [], 'error' => $result['error']];
+        }
+
+        return ['ok' => true, 'requests' => $result['data']['payslip_requests'] ?? [], 'error' => null];
     }
 
-        public function requestPayslip(int $employeeId, string $period): array {
-            $body = json_encode(['employee_id' => $employeeId, 'period' => $period]);
-            $timestamp = (string) time();
-            $signature = $this->signer->sign($body, $timestamp, $this->arsSecret);
+    /**
+     * @return array{ok: bool, error: ?string}
+     */
+    public function fulfillPayslipRequest(int $requestId, string $payslipReference): array
+    {
+        $result = $this->request(
+            'POST',
+            "/api/v1/payslip-requests/{$requestId}/fulfill",
+            ['payslip_reference' => $payslipReference]
+        );
 
-            $response = $this->client->request('POST', $this->arsBaseUrl . '/api/v1/payslip'. [
-                'body' => $body,
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'X-Timestamp' => $timestamp,
-                    'X-Signature' => $signature,
-                ],
+        return ['ok' => $result['ok'], 'error' => $result['error']];
+    }
+
+    /**
+     * @return array{ok: bool, status: int, data: mixed, error: ?string}
+     */
+    private function request(string $method, string $path, ?array $body = null): array
+    {
+        if ($this->arsBaseUrl === '') {
+            return ['ok' => false, 'status' => 0, 'data' => null, 'error' => 'ars_base_url_not_configured'];
+        }
+        if ($this->secret === '' || $this->secret === 'CHANGE_ME_GENERATE_A_RANDOM_64_CHAR_HEX_SECRET') {
+            return ['ok' => false, 'status' => 0, 'data' => null, 'error' => 'ars_hmac_secret_not_configured'];
+        }
+
+        // Signing uses only the path (no query string) per ARS's protocol —
+        // strip it off here so ?status=pending doesn't end up inside the
+        // signed canonical string while still being sent on the wire.
+        $signedPath = strtok($path, '?');
+        $bodyJson = $body !== null ? json_encode($body) : '';
+
+        $headers = $this->signer->sign($method, $signedPath, $bodyJson, $this->serviceId, $this->secret);
+        $headers['Content-Type'] = 'application/json';
+
+        try {
+            $response = $this->client->request($method, $this->arsBaseUrl . $path, [
+                'headers' => $headers,
+                'body' => $bodyJson,
+                'timeout' => 10,
             ]);
 
-            return $response->toArray();
+            $status = $response->getStatusCode();
+            $data = null;
+            try {
+                $data = $response->toArray(false);
+            } catch (\Throwable) {
+                // Non-JSON or empty body — leave $data null, status still tells the caller what happened.
+            }
+
+            return [
+                'ok' => $status >= 200 && $status < 300,
+                'status' => $status,
+                'data' => $data,
+                'error' => ($status >= 200 && $status < 300) ? null : ($data['error'] ?? 'http_' . $status),
+            ];
+        } catch (HttpExceptionInterface $e) {
+            return ['ok' => false, 'status' => 0, 'data' => null, 'error' => 'connection_failed: ' . $e->getMessage()];
         }
     }
+}
