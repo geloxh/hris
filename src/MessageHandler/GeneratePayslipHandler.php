@@ -18,5 +18,10 @@
             // dispatching this message ends in a real, signed
             // POST /api/v1/payslip-requests/{id}/fulfill call to ARS.
             $payslipReference = 'PENDING-GENERATION-' . $message->arsRequestId;
+            $result = $this->ars->fulfillPayslipRequest($message->arsRequestId, $payslipReference);
+
+            if (!$result['ok']) {
+                throw new \RuntimeException( "Failed to fulfill ARS payslip request {$message->arsRequestId}: {$result['error']}" );
+            }
         }
     }
