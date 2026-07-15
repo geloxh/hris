@@ -4,60 +4,63 @@ Aims to Streamlines the Small-to-Medium(SME) Human Resources(HR) operations into
 ### Prerequisites
 - **Php** - https://www.php.net/downloads.php
 - **Composer** - https://getcomposer.org/download/
-- **Symfony** - https://symfony.com/download
 - **Docker** - https://docs.docker.com/desktop/setup/install/windows-install/
 - **MySQL** - https://www.mysql.com/downloads/ (for deployment)
 
 ### Project Structure
 ```
-    project-root/
+    hris/
+    ├── docker/
+    │   ├── php/Dockerfile
+    │   ├── nginx/default.conf
+    │   └── mysql/init.sql
     ├── docker-compose.yml
-    ├── docker-compose.override.yml
-    ├── automated-requesting-system/     # existing PHP, unchanged
-    │   ├── public/
-    │   ├── src/
-    │   └── Dockerfile
-    ├── hris/                            # Symfony
-    │   ├── bin/console
-    │   ├── config/
-    │   │   ├── packages/
-    │   │   │   └── messenger.yaml       # async payslip queue config
-    │   │   ├── services.yaml
-    │   │   └── routes.yaml
-    │   ├── public/
-    │   │   └── index.php
-    │   ├── src/
-    │   │   ├── Controller/
-    │   │   │   ├── Api/
-    │   │   │   │   └── PayslipController.php
-    │   │   │   └── EmployeeController.php
-    │   │   ├── Entity/
-    │   │   │   ├── Employee.php
-    │   │   │   └── PayslipRequest.php
-    │   │   ├── Repository/
-    │   │   ├── Security/
-    │   │   │   └── HmacAuthenticator.php   # verifies inbound HMAC (if ARS calls back)
-    │   │   ├── Service/
-    │   │   │   ├── ArsClient.php           # outbound HMAC-signed client to ARS
-    │   │   │   └── HmacSigner.php          # shared signing logic
-    │   │   ├── Message/
-    │   │   │   └── GeneratePayslipMessage.php
-    │   │   └── MessageHandler/
-    │   │       └── GeneratePayslipHandler.php
+    ├── public/                    # Web root (only this is exposed)
+    │   ├── index.php              # Front controller
+    │   ├── assets/
+    │   │   ├── css/
+    │   │   ├── js/
+    │   │   └── img/
+    │   └── .htaccess (if Apache) 
+    ├── src/
+    │   ├── Config/
+    │   │   ├── config.php
+    │   │   └── database.php
+    │   ├── Core/
+    │   │   ├── Router.php
+    │   │   ├── Controller.php
+    │   │   ├── Model.php
+    │   │   ├── Database.php       # PDO singleton/wrapper
+    │   │   ├── Request.php
+    │   │   ├── Response.php
+    │   │   ├── Auth.php
+    │   │   ├── Validator.php
+    │   │   └── Middleware.php
+    │   ├── Modules/
+    │   │   ├── Employee/
+    │   │   │   ├── EmployeeController.php
+    │   │   │   ├── EmployeeModel.php
+    │   │   │   └── EmployeeService.php
+    │   │   ├── EmployeeData/       # profiles, contracts, documents, org chart
+    │   │   ├── Payroll/            # payroll runs, tax, compensation, benefits
+    │   │   ├── TimeAttendance/      # timesheets, leave, scheduling
+    │   │   ├── Recruitment/         # ATS, onboarding, job postings
+    |   |   ├── Performance/         # goals/OKRs, reviews, 360 feedback
+    |   |   ├── Learning/            # courses, certifications, career paths
+    |   |   ├── SelfService/         # employee/manager portals (mostly thin controllers over other modules)
+    |   |   ├── Analytics/           # dashboards, reports, report builder
+    |   |   └── Compliance/          # audit trails, policy acknowledgment, labor law tracking
+    |   |
+    |   |
+    │   ├── Helpers/
+    │   └── Middleware/
+    ├── database/
     │   ├── migrations/
-    │   ├── tests/
-    │   │   ├── Unit/
-    │   │   └── Functional/
-    │   ├── Dockerfile
-    │   └── .env
-    ├── shared/
-    │   └── hmac-lib/                    # composer package, required by both apps
-    │       ├── src/HmacSigner.php
-    │       └── composer.json
-    ├── nginx/
-    │   ├── ars.conf
-    │   └── hris.conf
-    └── docker/
-        ├── php-ars/Dockerfile
-        └── php-hris/Dockerfile
+    │   └── seeders/
+    ├── storage/
+    │   ├── logs/
+    │   └── uploads/
+    ├── tests/
+    ├── vendor/                     # if using Composer for autoload only
+    └── composer.json
 ```
