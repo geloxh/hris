@@ -1,23 +1,18 @@
 <?php
 
-/**
- * Front controller.
- * Nginx (see docker/nginx/default.conf) rewrites every request that isn't a
- * real static file to this script, so this is the single entry point of the API.
- */
+    require __DIR__ . '/../vendor/autoload.php';
 
-declare(strict_types=1);
+    $router = new App\Core\Router();
+    $router->addGlobalMiddleware(App\Middleware\CorsMiddleware::class);
 
-define('APP_START', microtime(true));
+    // public routes
+    $router->post('/auth/login', [App\Modules\Auth\AuthController::class, 'login']);
 
-require dirname(__DIR__) . '/bootstrap.php';
+    // protected routes
+    $router->get( '/employees', [App\Modules\Employee\EmployeeController::class, 'index'], [App\Middleware\AuthMiddleware::class] );
 
-use App\Core\Request;
-use App\Core\Router;
+    $router->post( '/employees', [App\Modules\Employee\EmployeeController::class, 'store'], [App\Middleware\AuthMiddleware::class, App\Middleware\RoleMiddleware::only(['admin', 'hr_manager'])] );
 
-$router = new Router();
+    $router->get( '/employees/{id}', [App\Modules\Employee\EmployeeController::class, 'show'], [App\Middleware\AuthMiddleware::class] );
 
-require dirname(__DIR__) . '/src/routes.php'; // registers all routes onto $router
-
-$request = new Request();
-$router->dispatch($request);
+    $router->dispatch( new App\Core\Request() );

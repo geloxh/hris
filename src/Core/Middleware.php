@@ -2,11 +2,6 @@
 
 namespace App\Core;
 
-interface Middleware
-{
-    /**
-     * @param Request $request
-     * @param callable $next call $next($request) to continue the chain
-     */
+interface Middleware {
     public function handle(Request $request, callable $next): void;
 }
