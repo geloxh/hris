@@ -1,1 +1,75 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: hris_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    networks:
+      - hris_net
+    restart: unless-stopped
 
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: hris_php
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - hris_net
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: hris_mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"   # remove/comment out in production - no reason to expose this externally
+    volumes:
+      - hris_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hris_net
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: hris_phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - hris_net
+    restart: unless-stopped
+    # dev convenience only - remove this service entirely for a production deploy
+
+networks:
+  hris_net:
+    driver: bridge
+
+volumes:
+  hris_mysql_data:
