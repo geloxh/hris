@@ -1,6 +1,0 @@
-.git
-.gitignore
-.env
-storage/logs/*.log
-node_modules
-*.md

@@ -1,8 +1,0 @@
-.env
-vendor/
-node_modules/
-storage/logs/*.log
-storage/uploads/*
-!storage/uploads/.gitkeep
-.DS_Store
-*.log
