@@ -9,3 +9,17 @@
 - make dir for src that contains (app.js & server.js)
   app.js - configure Express, security settings, and global middleware.
   server.js - serves as the main entry point to connect to your database and start the server.
+
+- make dir config that contains (database.js & logger.js)
+  database.js - database configuration file
+  logger.js - auth configuration file
+
+- Identify modules
+    * EmployeeData # profiles, contracts, documents, org chart
+    * Payroll # payroll runs, tax, compensation, benefits
+    * TimeAttendance # timesheets, leave, scheduling
+    * Recruitment # ATS, onboarding, job postings
+    * Performance # goals/OKRs, reviews, 360 feedback
+    * SelfService # employee/manager portals (mostly thin controllers over other modules)
+    * Analytics # dashboards, reports, report builder
+    * Compliance # audit trails, policy acknowledgment, labor law 
