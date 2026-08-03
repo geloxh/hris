@@ -1,0 +1,11 @@
+### Backend First
+
+- Initialize with npm `npm init -y`
+
+- Install dependecies `npm install express mongoose jsonwebtoken cookie-parser zod helmet cors express-rate-limit pino morgan dotenv`
+
+- Install development dependencies `npm install -D nodemon`
+
+- make dir for src that contains (app.js & server.js)
+  app.js - configure Express, security settings, and global middleware.
+  server.js - serves as the main entry point to connect to your database and start the server.
