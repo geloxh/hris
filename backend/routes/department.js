@@ -4,7 +4,7 @@ const router = express.Router();
 const {
     createDepartment,
     listDepartments,
-    getDeparment,
+    getDepartment,
     updateDepartment,
     deactivateDepartment,
 } = require('../controller/DepartmentController');

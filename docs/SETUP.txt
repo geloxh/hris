@@ -23,3 +23,5 @@
     * SelfService # employee/manager portals (mostly thin controllers over other modules)
     * Analytics # dashboards, reports, report builder
     * Compliance # audit trails, policy acknowledgment, labor law 
+
+- 

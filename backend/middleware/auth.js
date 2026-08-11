@@ -1,6 +1,6 @@
 const { verifyToken } = require('../utils/jwt');
 const ApiError = require('../utils/ApiError')
-const asyncHandler = require('../utils/syncHandler');
+const asyncHandler = require('../utils/asyncHandler');
 const user = require('../models/User');
 
 const authenticate = asyncHandler(async (req, res, next) => {

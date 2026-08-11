@@ -22,4 +22,16 @@ Technology Stack
 - **Icons**: Lucide React
 - **Desktop Wrapper**: Electron (Enables native desktop features)
 
+### Run System
+```bash
+# backend
+cd backend && npm install && cp .env.example .env   # fill in JWT_SECRET + Mongo URI
+npm run dev
+
+# frontend, in a second terminal
+cd frontend && npm install && cp .env.example .env
+npm run electron:dev   # opens as a real desktop window
+# or: npm run dev       # opens in a browser tab instead, for faster iteration
+```
+
 ## geloxh
