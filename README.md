@@ -21,3 +21,5 @@ Technology Stack
 - **Routing**: React Router 7
 - **Icons**: Lucide React
 - **Desktop Wrapper**: Electron (Enables native desktop features)
+
+## geloxh
