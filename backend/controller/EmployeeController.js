@@ -25,6 +25,51 @@ const listEmployees = asyncHandler(async (req, res) => {
     }
 
     const [employees, total] = await Promise.all([
-        Employee
-    ])
-})
+        Employee.find(filter)
+            .populate('department', 'name code')
+            .sort({ createdAt: -1 })
+            .skip((page -1) * limit)
+            .limit(limit),
+        Employee.countDocuments(filter),
+    ]);
+
+    res.json({
+        success: true,
+        data: { employees },
+        pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+});
+
+const getEmployee = asyncHandler(async (req, res) => {
+    const employee = await Employee.findById(req.params.id).populate('department', 'name code');
+    if (!employee) throw ApiError.notFound('Employee not found.');
+    res.json({ success: true, data: { employee } });
+});
+
+const updateEmployee = asyncHandler(async (req, res) => {
+    const employee = await Employee.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true, runValidators: true }
+    );
+    if (!employee) throw ApiError.notFound('Employee not found.');
+    res.json({ success: true, data: { employee } });
+});
+
+const deactivateEmployee = asyncHandler(async (req, res) => {
+    const employee = await Employee.findByIdAndUpdate(
+        req.params.id,
+        { $set: { isActive: false } },
+        { new: true }
+    );
+    if (!employee) throw ApiError.notFound('Employee not found.');
+    res.json({ success: true, message: 'Employee deactivated', data: {employee } });
+});
+
+module.exports = {
+    createEmployee,
+    listEmployees,
+    getEmployee,
+    updateEmployee,
+    deactivateEmployee,
+};
